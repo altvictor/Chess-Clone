@@ -82,21 +82,20 @@ class Board(Frame):
                                 self._bdead.append(self._bpieces.pop(x))
                                 break
                 piece1.setLocation((row, column))
+                self._turn = not self._turn
 
             for x in range(len(self._spaces)):
                 self._spaces[x]["state"] = NORMAL
             self._pressed = False
-            self._turn = not self._turn
 
         else:
             self._location = (row, column)
             piece = self.find((row, column))
             if piece is not None:
                 if (piece.isWhite() and self._turn) or (not piece.isWhite() and not self._turn):
-                    piece.checkMoves(self)
                     for x in range(len(self._spaces)):
                         self._spaces[x]["state"] = DISABLED
-                    possible = piece.getPossible()
+                    possible = piece.checkValid(self)
                     self._spaces[row*8+column]["state"] = NORMAL
                     for x in range(len(possible)):
                         (a, b) = possible[x]

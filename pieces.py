@@ -14,10 +14,6 @@ class Piece:
         self._type = pieceType
         self._moved = False
 
-        self._moves = []
-        self._possible = []
-        self._impossible = []
-
         self._move = [self.king, self.queen, self.bishop, self.knight, self.rook, self.pawn]
 
     def __str__(self):
@@ -33,36 +29,30 @@ class Piece:
     def getPiece(self):
         return self._type
 
-    def getMoves(self):
-        return self._moves
-
-    def getPossible(self):
-        return self._possible
-
-    def getImpossible(self):
-        return self._impossible
-
     def setLocation(self, location):
         self._location = location
         self._moved = True
 
-    def checkMoves(self, board):
+    def getMoves(self, board):
         # separate
         self._moves.clear()
 
-        self._move[self._type](board)
-        self._possible = self._moves[:]
-        self._impossible.clear()
+    def checkValid(self, board):
+        moves = self._move[self._type](board)
+        impossible = self.getImpossible(board, moves)
+        return self.getPossible(moves, impossible)
 
+    def getImpossible(self, board, moves):
+        impossible = []
         # check for own color
         if self._isWhite:
             pieces = board.getWPieces()
         else:
             pieces = board.getBPieces()
-        for a in range(len(self._moves)):
+        for a in range(len(moves)):
             for b in range(len(pieces)):
-                if self._moves[a] == pieces[b].getLocation():
-                    self._impossible.append(self._moves[a])
+                if moves[a] == pieces[b].getLocation():
+                    impossible.append(moves[a])
         # check for in front of pawn
         if self._type == 5:
             (x, y) = self._location
@@ -73,133 +63,149 @@ class Piece:
             for a in range(len(pieces)):
                 if self._isWhite:
                     if pieces[a].getLocation() == (x-1, y):
-                        print("test")
-                        self._impossible.append((x-1, y))
+                        impossible.append((x-1, y))
                 else:
                     if pieces[a].getLocation() == (x+1, y):
-                        print("test")
-                        self._impossible.append((x+1, y))
+                        impossible.append((x+1, y))
+        return impossible
 
+    def getPossible(self, moves, impossible):
+        possible = moves[:]
         destroy = []
-        for a in range(len(self._possible)):
-            for b in range(len(self._impossible)):
-                if self._possible[a] == self._impossible[b]:
-                    destroy.append(self._possible.pop(a))
-        # subtract arrays?
+        for a in range(len(possible)):
+            for b in range(len(impossible)):
+                if possible[a] == impossible[b]:
+                    print(possible[a])
+                    destroy.append(possible[a])
+        print(possible)
+        print(destroy)
+        for x in destroy:
+            possible.remove(x)
+        return possible
 
     def king(self, board):
+        moves = []
         (x, y) = self._location
         if x-1 >= 0 and y-1 >= 0:
-            self._moves.append((x-1, y-1))
+            moves.append((x-1, y-1))
         if x-1 >= 0:
-            self._moves.append((x-1, y))
+            moves.append((x-1, y))
         if x-1 >= 0 and y+1 <= 7:
-            self._moves.append((x-1, y+1))
+            moves.append((x-1, y+1))
         if y-1 >= 0:
-            self._moves.append((x, y-1))
+            moves.append((x, y-1))
         if y+1 <= 7:
-            self._moves.append((x, y+1))
+            moves.append((x, y+1))
         if x+1 <= 7 and y-1 >= 0:
-            self._moves.append((x+1, y-1))
+            moves.append((x+1, y-1))
         if x+1 <= 7:
-            self._moves.append((x+1, y))
+            moves.append((x+1, y))
         if x+1 <=7 and y <= 1:
-            self._moves.append((x+1, y+1))
+            moves.append((x+1, y+1))
+        return moves
 
     def queen(self, board):
+        moves = []
         (x, y) = self._location
         for a in range(7):
-            self._moves.append((x, a))
-            self._moves.append((a, y))
+            moves.append((x, a))
+            moves.append((a, y))
         count = 1
         while x-count >= 0 and y-count >= 0:
-            self._moves.append((x-count, y-count))
+            moves.append((x-count, y-count))
             count += 1
         count = 1
         while x-count >= 0 and y+count <= 7:
-            self._moves.append((x-count, y+count))
+            moves.append((x-count, y+count))
             count += 1
         count = 1
         while x+count <= 7 and y-count >= 0:
-            self._moves.append((x+count, y-count))
+            moves.append((x+count, y-count))
             count += 1
         count = 1
         while x+count <= 7 and y+count <= 7:
-            self._moves.append((x+count, y+count))
+            moves.append((x+count, y+count))
             count += 1
+        return moves
 
     def bishop(self, board):
+        moves = []
         (x, y) = self._location
         count = 1
         while x - count >= 0 and y - count >= 0:
-            self._moves.append((x - count, y - count))
+            moves.append((x - count, y - count))
             count += 1
         count = 1
         while x - count >= 0 and y + count <= 7:
-            self._moves.append((x - count, y + count))
+            moves.append((x - count, y + count))
             count += 1
         count = 1
         while x + count <= 7 and y - count >= 0:
-            self._moves.append((x + count, y - count))
+            moves.append((x + count, y - count))
             count += 1
         count = 1
         while x + count <= 7 and y + count <= 7:
-            self._moves.append((x + count, y + count))
+            moves.append((x + count, y + count))
             count += 1
 
     def knight(self, board):
+        moves = []
         (x, y) = self._location
         if x >= 2:
             if y >= 1:
-                self._moves.append((x-2, y-1))
+                moves.append((x-2, y-1))
             if y <= 6:
-                self._moves.append((x-2, y+1))
+                moves.append((x-2, y+1))
         if x <= 5:
             if y >= 1:
-                self._moves.append((x+2, y-1))
+                moves.append((x+2, y-1))
             if y <= 6:
-                self._moves.append((x+2, y+1))
+                moves.append((x+2, y+1))
         if y >= 2:
             if x >= 1:
-                self._moves.append((x-1, y-2))
+                moves.append((x-1, y-2))
             if x <= 6:
-                self._moves.append((x+1, y-2))
+                moves.append((x+1, y-2))
         if y <= 5:
             if x >= 1:
-                self._moves.append((x-1, y+2))
+                moves.append((x-1, y+2))
             if x <= 6:
-                self._moves.append((x+1, y+2))
+                moves.append((x+1, y+2))
+        return moves
 
     def rook(self, board):
+        moves = []
         (x, y) = self._location
         for a in range(7):
-            self._moves.append((x, a))
-            self._moves.append((a, y))
+            moves.append((x, a))
+            moves.append((a, y))
 
     def pawn(self, board):
+        moves = []
         (x, y) = self._location
         if self._isWhite:
             if not self._moved:
-                self._moves.append((x-2, y))
+                moves.append((x-2, y))
             if x >= 1:
-                self._moves.append((x-1, y))
+                moves.append((x-1, y))
             pieces = board.getBPieces()
             for x in range(len(pieces)):
                 if pieces[x].getLocation == (x-1, y-1):
-                    self._moves.append((x-1, y-1))
+                    moves.append((x-1, y-1))
                 if pieces[x].getLocation == (x-1, y+1):
-                    self._moves.append((x-1, y+1))
+                    moves.append((x-1, y+1))
         else:
             if not self._moved:
-                self._moves.append((x+2, y))
+                moves.append((x+2, y))
             if x <= 6:
-                self._moves.append((x+1, y))
+                moves.append((x+1, y))
             pieces = board.getWPieces()
             for x in range(len(pieces)):
                 if pieces[x].getLocation == (x+1, y-1):
-                    self._moves.append((x+1, y-1))
+                    moves.append((x+1, y-1))
                 if pieces[x].getLocation == (x+1, y+1):
-                    self._moves.append((x+1, y+1))
+                    moves.append((x+1, y+1))
+        return moves
 
 
 class King(Piece):
@@ -209,20 +215,20 @@ class King(Piece):
 
     def check(self, pieces):
         for a in range(len(pieces)):
-            moves = pieces[a].getPossible()
+            moves = pieces[a].checkValid()
             for b in range(len(moves)):
                 if moves[b] == Piece.getLocation():
                     return True
         return False
 
-    def checkmate(self, pieces):
+    def checkmate(self, board, pieces):
         if not self.check(pieces):
             return False
         possible = []
         for a in range(len(pieces)):
-            moves = pieces[a].getPossible()
+            moves = pieces[a].checkValid(board)
             for b in range(len(moves)):
-                possible = Piece.getPossible(self)
+                possible = Piece.checkValid(self, board)
                 for c in range(len(possible)):
                     if possible[c] == moves[b]:
                         possible.pop(c)
