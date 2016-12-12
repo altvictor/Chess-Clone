@@ -75,10 +75,7 @@ class Piece:
         for a in range(len(possible)):
             for b in range(len(impossible)):
                 if possible[a] == impossible[b]:
-                    print(possible[a])
                     destroy.append(possible[a])
-        print(possible)
-        print(destroy)
         for x in destroy:
             possible.remove(x)
         return possible
