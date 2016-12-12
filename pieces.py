@@ -33,10 +33,6 @@ class Piece:
         self._location = location
         self._moved = True
 
-    def getMoves(self, board):
-        # separate
-        self._moves.clear()
-
     def checkValid(self, board):
         moves = self._move[self._type](board)
         impossible = self.getImpossible(board, moves)
@@ -144,6 +140,7 @@ class Piece:
         while x + count <= 7 and y + count <= 7:
             moves.append((x + count, y + count))
             count += 1
+        return moves
 
     def knight(self, board):
         moves = []
@@ -176,6 +173,7 @@ class Piece:
         for a in range(7):
             moves.append((x, a))
             moves.append((a, y))
+        return moves
 
     def pawn(self, board):
         moves = []

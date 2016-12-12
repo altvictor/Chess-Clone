@@ -3,12 +3,13 @@ Author: Victor Ho
 Program: Final Project
 Process: Create a clone of Chess
 """
-from boards import Board
-
+from games import Game
+from tkinter import *
 
 def main():
-    board = Board()
-    board.mainloop()
+
+    run = Game()
+    run.mainloop()
 
 
 main()
