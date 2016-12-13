@@ -1,5 +1,5 @@
 from tkinter import *
-from pieces import Piece, King
+from pieces import Piece, King, PIECES
 from random import randint
 
 
@@ -33,8 +33,8 @@ class Board(Frame):
         self._pressed = False
         self._turn = True
         self._location = 0
-        self._player1 = True
-        self._player2 = True
+        self._player1 = (True, "Player 1")
+        self._player2 = (True, "Player 2")
 
         self._spaces = []
         for y in range(8):
@@ -168,8 +168,18 @@ class Board(Frame):
                         if self._bpieces[x] == piece2:
                             self._bdead.append(self._bpieces.pop(x))
                             break
+
             piece1.setLocation(location2)
             self._turn = not self._turn
+
+            # print result
+            if piece1.isWhite():
+                name = self._player1[1]
+                rank = piece1.getPiece()
+            else:
+                name = self._player2[1]
+                rank = piece2.getPiece()
+            print(name + " has moved " + PIECES[rank] + " from " + str((a, b)) + " to " + str((c, d)))
 
     def updatePlayers(self, p1, p2):
         self._player1 = p1
@@ -202,8 +212,8 @@ class Board(Frame):
 
     def checkAImove(self):
         if self._turn:
-            if not self._player1:
+            if not self._player1[0]:
                 self.AImove(self._wpieces, self._bpieces)
         else:
-            if not self._player2:
+            if not self._player2[0]:
                 self.AImove(self._bpieces, self._wpieces)

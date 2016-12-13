@@ -17,7 +17,6 @@ main()
 """
 things to implement
 - check and checkmate
-- print move
 - show dead
 
 no timer

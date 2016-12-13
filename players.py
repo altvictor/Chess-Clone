@@ -24,7 +24,7 @@ class Player(Frame):
         self._aiButton.grid(row=0, column=2)
 
     def getName(self):
-        return self._name
+        return self._nameVar.get()
 
     def isHuman(self):
         return self._isHuman
