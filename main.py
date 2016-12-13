@@ -4,7 +4,7 @@ Program: Final Project
 Process: Create a clone of Chess
 """
 from games import Game
-from tkinter import *
+
 
 def main():
 
@@ -22,4 +22,5 @@ things to implement
 - show dead
 
 no timer
+no color
 """

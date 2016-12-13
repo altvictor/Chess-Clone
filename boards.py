@@ -4,12 +4,11 @@ from pieces import Piece, King
 
 class Board(Frame):
 
-    def __init__(self):
+    def __init__(self, frame):
         Frame.__init__(self)
-        self.master.title("Chess")
         self.grid()
 
-        self._grids = Frame(self)
+        self._grids = frame
         self._grids.grid()
 
         self._blank = PhotoImage(file="images/blank.gif")
@@ -164,6 +163,6 @@ class Board(Frame):
     def getBPieces(self):
         return self._bpieces
 
-
-gui = Board()
-gui.mainloop()
+#
+# gui = Board()
+# gui.mainloop()
