@@ -16,11 +16,11 @@ main()
 
 """
 things to implement
-- player
+- check and checkmate
 - print move
-- ai
 - show dead
 
 no timer
 no color
+no promotion
 """

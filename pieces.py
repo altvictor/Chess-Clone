@@ -1,9 +1,4 @@
-KING = 0
-QUEEN = 1
-BISHOP = 2
-KNIGHT = 3
-ROOK = 4
-PAWN = 5
+PIECES = {0: "King", 1: "Queen", 2: "Bishop", 3: "Knight", 4: "Rook", 5: "Pawn"}
 
 
 class Piece:
@@ -17,7 +12,7 @@ class Piece:
         self._move = [self.king, self.queen, self.bishop, self.knight, self.rook, self.pawn]
 
     def __str__(self):
-        string = "[" + str(self._location) + str(self._type) + "]"
+        string = "[" + str(self._location) + "|" + PIECES[self._type] + "]"
         return string
 
     def isWhite(self):
@@ -49,6 +44,11 @@ class Piece:
             for b in range(len(pieces)):
                 if moves[a] == pieces[b].getLocation():
                     impossible.append(moves[a])
+        # check for going through pieces
+        if self._type == 1 or self._type == 2:
+            impossible += self.diagonalBlock(board)
+        if self._type == 1 or self._type == 4:
+            impossible += self.parallelBlock(board)
         # check for in front of pawn
         if self._type == 5:
             (x, y) = self._location
@@ -72,8 +72,9 @@ class Piece:
             for b in range(len(impossible)):
                 if possible[a] == impossible[b]:
                     destroy.append(possible[a])
-        for x in destroy:
-            possible.remove(x)
+        destroy = list(set(destroy))
+        for item in destroy:
+            possible.remove(item)
         return possible
 
     def king(self, board):
@@ -183,24 +184,161 @@ class Piece:
                 moves.append((x-2, y))
             if x >= 1:
                 moves.append((x-1, y))
+            # check to eat
             pieces = board.getBPieces()
-            for x in range(len(pieces)):
-                if pieces[x].getLocation == (x-1, y-1):
+            for a in range(len(pieces)):
+                if pieces[a].getLocation() == (x-1, y-1):
                     moves.append((x-1, y-1))
-                if pieces[x].getLocation == (x-1, y+1):
+                if pieces[a].getLocation() == (x-1, y+1):
                     moves.append((x-1, y+1))
         else:
             if not self._moved:
                 moves.append((x+2, y))
             if x <= 6:
                 moves.append((x+1, y))
+            # check to eat
             pieces = board.getWPieces()
-            for x in range(len(pieces)):
-                if pieces[x].getLocation == (x+1, y-1):
+            for a in range(len(pieces)):
+                if pieces[a].getLocation() == (x+1, y-1):
                     moves.append((x+1, y-1))
-                if pieces[x].getLocation == (x+1, y+1):
+                if pieces[a].getLocation() == (x+1, y+1):
                     moves.append((x+1, y+1))
         return moves
+
+    def diagonalBlock(self, board):
+        impossible = []
+        (x, y) = self._location
+        if self._isWhite:
+            pieces1 = board.getBPieces()
+            pieces2 = board.getWPieces()
+        else:
+            pieces1 = board.getWPieces()
+            pieces2 = board.getBPieces()
+
+        blocked = False
+        count = 1
+        while x - count >= 0 and y - count >= 0:
+            if blocked:
+                impossible.append((x - count, y - count))
+            else:
+                for piece in pieces1:
+                    if piece.getLocation() == (x - count, y - count):
+                        blocked = True
+                for piece in pieces2:
+                    if piece.getLocation() == (x - count, y - count):
+                        impossible.append((x - count, y - count))
+                        blocked = True
+            count += 1
+        blocked = False
+        count = 1
+        while x - count >= 0 and y + count <= 7:
+            if blocked:
+                impossible.append((x - count, y + count))
+            else:
+                for piece in pieces1:
+                    if piece.getLocation() == (x - count, y + count):
+                        blocked = True
+                for piece in pieces2:
+                    if piece.getLocation() == (x - count, y + count):
+                        impossible.append((x - count, y + count))
+                        blocked = True
+            count += 1
+        blocked = False
+        count = 1
+        while x + count <= 7 and y - count >= 0:
+            if blocked:
+                impossible.append((x + count, y - count))
+            else:
+                for piece in pieces1:
+                    if piece.getLocation() == (x + count, y - count):
+                        blocked = True
+                for piece in pieces2:
+                    if piece.getLocation() == (x + count, y - count):
+                        impossible.append((x + count, y - count))
+                        blocked = True
+            count += 1
+        blocked = False
+        count = 1
+        while x + count <= 7 and y + count <= 7:
+            if blocked:
+                impossible.append((x + count, y + count))
+            else:
+                for piece in pieces1:
+                    if piece.getLocation() == (x + count, y + count):
+                        blocked = True
+                for piece in pieces2:
+                    if piece.getLocation() == (x + count, y + count):
+                        impossible.append((x + count, y + count))
+                        blocked = True
+            count += 1
+        return impossible
+
+    def parallelBlock(self, board):
+        impossible = []
+        (x, y) = self._location
+        if self._isWhite:
+            pieces1 = board.getBPieces()
+            pieces2 = board.getWPieces()
+        else:
+            pieces1 = board.getWPieces()
+            pieces2 = board.getBPieces()
+        blocked = False
+        count = 1
+        while x - count >= 0:
+            if blocked:
+                impossible.append((x - count, y))
+            else:
+                for piece in pieces1:
+                    if piece.getLocation() == (x - count, y):
+                        blocked = True
+                for piece in pieces2:
+                    if piece.getLocation() == (x - count, y):
+                        impossible.append((x - count, y))
+                        blocked = True
+            count += 1
+        blocked = False
+        count = 1
+        while x + count <= 7:
+            if blocked:
+                impossible.append((x + count, y))
+            else:
+                for piece in pieces1:
+                    if piece.getLocation() == (x + count, y):
+                        blocked = True
+                for piece in pieces2:
+                    if piece.getLocation() == (x + count, y):
+                        impossible.append((x + count, y))
+                        blocked = True
+            count += 1
+        blocked = False
+        count = 1
+        while y - count >= 0:
+            if blocked:
+                impossible.append((x, y - count))
+            else:
+                for piece in pieces1:
+                    if piece.getLocation() == (x, y - count):
+                        blocked = True
+                for piece in pieces2:
+                    if piece.getLocation() == (x, y - count):
+                        impossible.append((x, y - count))
+                        blocked = True
+            count += 1
+        blocked = False
+        count = 1
+        while y + count <= 7:
+            if blocked:
+                impossible.append((x, y + count))
+            else:
+                for piece in pieces1:
+                    if piece.getLocation() == (x, y + count):
+                        blocked = True
+                for piece in pieces2:
+                    if piece.getLocation() == (x, y + count):
+                        impossible.append((x, y + count))
+                        blocked = True
+            count += 1
+        return impossible
 
 
 class King(Piece):

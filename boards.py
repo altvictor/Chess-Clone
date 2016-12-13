@@ -1,5 +1,6 @@
 from tkinter import *
 from pieces import Piece, King
+from random import randint
 
 
 class Board(Frame):
@@ -32,6 +33,8 @@ class Board(Frame):
         self._pressed = False
         self._turn = True
         self._location = 0
+        self._player1 = True
+        self._player2 = True
 
         self._spaces = []
         for y in range(8):
@@ -59,34 +62,12 @@ class Board(Frame):
 
     def press(self, row, column):
         if self._pressed:
-            piece1 = self.find(self._location)
-            piece2 = self.find((row, column))
-
-            if piece1 != piece2:
-                if piece2 is None:
-                    image = self._spaces[row*8+column]["image"]
-                    self._spaces[row*8+column]["image"] = self._spaces[self._location[0]*8+self._location[1]]["image"]
-                    self._spaces[self._location[0]*8+self._location[1]]["image"] = image
-                else:
-                    self._spaces[row*8+column]["image"] = self._spaces[self._location[0]*8+self._location[1]]["image"]
-                    self._spaces[self._location[0]*8+self._location[1]]["image"] = self._blank
-                    if piece2.isWhite():
-                        for x in range(len(self._wpieces)):
-                            if self._wpieces[x] == piece2:
-                                self._wdead.append(self._wpieces.pop(x))
-                                break
-                    else:
-                        for x in range(len(self._bpieces)):
-                            if self._bpieces[x] == piece2:
-                                self._bdead.append(self._bpieces.pop(x))
-                                break
-                piece1.setLocation((row, column))
-                self._turn = not self._turn
+            self.moveTo(self._location, (row, column))
 
             for x in range(len(self._spaces)):
                 self._spaces[x]["state"] = NORMAL
             self._pressed = False
-
+            self.checkAImove()
         else:
             self._location = (row, column)
             piece = self.find((row, column))
@@ -163,6 +144,66 @@ class Board(Frame):
     def getBPieces(self):
         return self._bpieces
 
-#
-# gui = Board()
-# gui.mainloop()
+    def moveTo(self, location1, location2):
+        (a, b) = location1
+        (c, d) = location2
+        piece1 = self.find(location1)
+        piece2 = self.find(location2)
+
+        if piece1 != piece2:
+            if piece2 is None:
+                image = self._spaces[c*8+d]["image"]
+                self._spaces[c*8+d]["image"] = self._spaces[a*8+b]["image"]
+                self._spaces[a*8+b]["image"] = image
+            else:
+                self._spaces[c*8+d]["image"] = self._spaces[a*8+b]["image"]
+                self._spaces[a*8+b]["image"] = self._blank
+                if piece2.isWhite():
+                    for x in range(len(self._wpieces)):
+                        if self._wpieces[x] == piece2:
+                            self._wdead.append(self._wpieces.pop(x))
+                            break
+                else:
+                    for x in range(len(self._bpieces)):
+                        if self._bpieces[x] == piece2:
+                            self._bdead.append(self._bpieces.pop(x))
+                            break
+            piece1.setLocation(location2)
+            self._turn = not self._turn
+
+    def updatePlayers(self, p1, p2):
+        self._player1 = p1
+        self._player2 = p2
+
+    def AImove(self, team, opp):
+        # check for eating
+        priority = []
+        for piece in team:
+            possible = piece.checkValid(self)
+            for moves in possible:
+                for enemies in opp:
+                    if moves == enemies.getLocation():
+                        priority.append((enemies.getPiece(), piece.getLocation(), moves))
+
+        if len(priority) > 0:
+            priority.sort()
+            (rank, piece1, piece2) = priority[0]
+            self.moveTo(piece1, piece2)
+        else:
+            move = 0
+            piece = 0
+            while not move:
+                piece = team[randint(0, len(team)-1)]
+                moves = piece.checkValid(self)
+                if moves:
+                    move = moves[randint(0, len(moves)-1)]
+            self.moveTo(piece.getLocation(), move)
+        self.checkAImove()
+
+    def checkAImove(self):
+        if self._turn:
+            if not self._player1:
+                self.AImove(self._wpieces, self._bpieces)
+        else:
+            if not self._player2:
+                self.AImove(self._bpieces, self._wpieces)

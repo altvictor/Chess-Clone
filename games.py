@@ -40,5 +40,9 @@ class Game(Frame):
             self._login["state"] = DISABLED
             for child in self._boardGrid.winfo_children():
                 child.configure(state=NORMAL)
+            p1 = self._player1.isHuman()
+            p2 = self._player2.isHuman()
+            self._board.updatePlayers(p1, p2)
+            self._board.checkAImove()
             return True
 
