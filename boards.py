@@ -151,7 +151,7 @@ class Board(Frame):
         piece1 = self.find(location1)
         piece2 = self.find(location2)
 
-        if piece1 != piece2:
+        if piece1 != piece2 and type(piece2) != King:
             self._spaces[c * 8 + d]["image"] = self._spaces[a * 8 + b]["image"]
             image = self._spaces[a * 8 + b]["image"]
             self._spaces[a * 8 + b]["image"] = self._blank
@@ -211,7 +211,8 @@ class Board(Frame):
                 if moves:
                     move = moves[randint(0, len(moves)-1)]
             self.moveTo(piece.getLocation(), move)
-        self.redraw()
+        sleep(1)
+        self._grids.update()
         self.checkAImove()
 
     def checkAImove(self):
