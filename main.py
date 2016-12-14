@@ -17,8 +17,8 @@ main()
 """
 things to implement
 - check and checkmate
-- show dead
 
+not showing dead
 no timer
 no color
 no promotion

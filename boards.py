@@ -1,6 +1,7 @@
 from tkinter import *
 from pieces import Piece, King, PIECES
 from random import randint
+from time import sleep
 
 
 class Board(Frame):
@@ -151,13 +152,10 @@ class Board(Frame):
         piece2 = self.find(location2)
 
         if piece1 != piece2:
-            if piece2 is None:
-                image = self._spaces[c*8+d]["image"]
-                self._spaces[c*8+d]["image"] = self._spaces[a*8+b]["image"]
-                self._spaces[a*8+b]["image"] = image
-            else:
-                self._spaces[c*8+d]["image"] = self._spaces[a*8+b]["image"]
-                self._spaces[a*8+b]["image"] = self._blank
+            self._spaces[c * 8 + d]["image"] = self._spaces[a * 8 + b]["image"]
+            image = self._spaces[a * 8 + b]["image"]
+            self._spaces[a * 8 + b]["image"] = self._blank
+            if piece2 is not None:
                 if piece2.isWhite():
                     for x in range(len(self._wpieces)):
                         if self._wpieces[x] == piece2:
@@ -170,16 +168,21 @@ class Board(Frame):
                             break
 
             piece1.setLocation(location2)
-            self._turn = not self._turn
 
-            # print result
             if piece1.isWhite():
                 name = self._player1[1]
-                rank = piece1.getPiece()
             else:
                 name = self._player2[1]
-                rank = piece2.getPiece()
+
+            if self.checkCheck():
+                print(name + " is in check")
+                self.undo(location1, location2, image)
+                return
+
+            rank = piece1.getPiece()
             print(name + " has moved " + PIECES[rank] + " from " + str((a, b)) + " to " + str((c, d)))
+            self.checkCheckmate()
+            self._turn = not self._turn
 
     def updatePlayers(self, p1, p2):
         self._player1 = p1
@@ -208,6 +211,7 @@ class Board(Frame):
                 if moves:
                     move = moves[randint(0, len(moves)-1)]
             self.moveTo(piece.getLocation(), move)
+        self.redraw()
         self.checkAImove()
 
     def checkAImove(self):
@@ -217,3 +221,59 @@ class Board(Frame):
         else:
             if not self._player2[0]:
                 self.AImove(self._bpieces, self._wpieces)
+
+    def checkCheck(self):
+        king = 0
+        if self._turn:
+            for piece in self._wpieces:
+                if type(piece) == King:
+                    king = piece
+                    break
+        else:
+            for piece in self._bpieces:
+                if type(piece) == King:
+                    king = piece
+                    break
+        if king.check(self, self._bpieces):
+            return True
+        else:
+            return False
+
+    def checkCheckmate(self):
+        wking = 0
+        bking = 0
+        for piece in self._wpieces:
+            if piece.getPiece() == 0:
+                wking = piece
+                break
+        for piece in self._bpieces:
+            if piece.getPiece() == 0:
+                bking = piece
+                break
+        if wking.checkmate(self, self._bpieces):
+            print(self._player2[1] + " has won!")
+            return True
+        elif bking.checkmate(self, self._wpieces):
+            print(self._player1[1] + " has won!")
+            return True
+        else:
+            return False
+
+    def undo(self, location1, location2, image):
+        (a, b) = location1
+        (c, d) = location2
+        if self._turn:
+            lastdead = self._bdead[-1]
+        else:
+            lastdead = self._wdead[-1]
+        piece = self.find(location2)
+        if lastdead.getLocation() == location2:
+            piece.setLocation(location1)
+            self._spaces[a*8+b]["image"] = self._spaces[c*8+d]["image"]
+            self._spaces[c*8+d]["image"] = image
+            if self._turn:
+                self._bpieces.append(self._bdead.pop())
+            else:
+                self._wpieces.append(self._wdead.pop())
+
+

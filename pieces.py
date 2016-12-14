@@ -63,6 +63,7 @@ class Piece:
                 else:
                     if pieces[a].getLocation() == (x+1, y):
                         impossible.append((x+1, y))
+
         return impossible
 
     def getPossible(self, moves, impossible):
@@ -346,26 +347,29 @@ class King(Piece):
     def __init__(self, isWhite, location):
         Piece.__init__(self, isWhite, location, 0)
 
-    def check(self, pieces):
+    def check(self, board, pieces):
         for a in range(len(pieces)):
-            moves = pieces[a].checkValid()
+            moves = pieces[a].checkValid(board)
             for b in range(len(moves)):
-                if moves[b] == Piece.getLocation():
+                if moves[b] == Piece.getLocation(self):
                     return True
         return False
 
     def checkmate(self, board, pieces):
-        if not self.check(pieces):
+        if not self.check(board, pieces):
             return False
         possible = []
         for a in range(len(pieces)):
             moves = pieces[a].checkValid(board)
             for b in range(len(moves)):
                 possible = Piece.checkValid(self, board)
+                destroy = []
                 for c in range(len(possible)):
                     if possible[c] == moves[b]:
-                        possible.pop(c)
-        if not possible:
-            return True
-        else:
-            return False
+                        destroy.append(possible[c])
+                destroy = list(set(destroy))
+                for item in destroy:
+                    possible.remove(item)
+                if not possible:
+                    return True
+        return False
