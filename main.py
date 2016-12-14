@@ -7,19 +7,9 @@ from games import Game
 
 
 def main():
-
+    # run the game
     run = Game()
     run.mainloop()
 
 
 main()
-
-"""
-things to implement
-- check and checkmate
-
-not showing dead
-no timer
-no color
-no promotion
-"""
